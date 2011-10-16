@@ -1,0 +1,174 @@
+
+=head1 COPYLEFT
+
+AUBBC2.pm, v1.00 alpha 2 10/16/2011 By: N.K.A.
+------------------>^- Yes this is a test version and is subjected to changes.
+
+shakaflex [at] gmail.com
+http://search.cpan.org/~sflex/
+
+Advanced Universal Bulletin Board Code 2 - Engine for BBcode to HTML
+
+BBcode Placeholders with HTML Template
+
+AUBBC vs AUBBC2
+
+AUBBC = Has more time used in production and testing but does not fully support
+Strict markup.
+
+AUBBC2 = Is an alpha version meaning any part of the program is subjected
+to changes and may not fully work or needs more testing.
+
+This module can fully support BBcode to HTML/XHTML Strict.
+Block in Inline and incorrectly nested tags do not exsits if you switch to
+CSS classes in DIV elements or we will find out soon enough.
+
+      use AUBBC2;
+      my $aubbc = AUBBC2->new();
+      my $message = '[b]stuf[/b]';
+      print  $aubbc->do_all_ubbc($message);
+
+
+=head1 Adding Tags
+
+        $aubbc->add_tag(
+          'tag' => 'Tag',               # Tag name:
+          'type' => '#',                # Type number: tag style
+          'function' => '',             # Function: subroutine to expand methods
+          'message' => 'any',           # Message: of tag
+          'extra' => '',                # Extra: of tag
+          'markup' => '',               # Template: output
+        );
+
+Type number:              Tag style
+
+1                       [tag]
+
+2			[tag]message[/tag] or [tag=extra]message[/tag] or [tag attr=x...]message[/tag] or [tag=x attr=x...]message[/tag]
+
+3			[tag://message] or [tag://message|extra]
+
+4                       replace or remove
+
+Tag name:
+This allows a single tag added to change many tags and supports more complex regex:
+
+        # This is an example of bold and italic in the same add_tag()
+        # Tags: [b]message[/b] or [i]message[/i]
+        # Output: <b>message</b> or <i>message</i>
+        $aubbc->add_tag(
+          'tag' => 'b|i', # b or i
+          'type' => '2',
+          'function' => '',
+          'message' => 'any',
+          'extra' => '',
+          'markup' => '<%{tag}>%{message}</%{tag}>',
+        );
+
+Function:
+The name gets check to make sure its a defined subroutine and gets passed more
+variables then before.
+
+        sub new_function {
+        # $tag, $message, $attrs are the captured group of its place
+         my ($type, $tag, $message, $markup, $extra, $attrs) = @_;
+
+         # expand functions....
+
+         # A) if there is a $message and blank $markup the $message will replace the tag.
+         # B) if there is both $message and $markup, then $message can be inserted
+         # into $markup if $markup has %{message} or any "Markup Template Tags",
+         # then markup will replace the tag.
+         # C) if both are blank the tag doesnt change.
+
+         return ($message, $markup);
+         # May have to return more so we have better/more controle
+        }
+
+Message:
+Allows regex or fast regex for 'any', 'href', 'src'
+
+href->  protocal://location/web/path/or/file
+
+src->  protocal://location/web/path/or/file or /local/web/path/or/file
+
+Extra: supports -> any href src
+
+Allows regex after tag= and message| or if negative pipe is in front will switch to the attribute
+syntax for attribute range matching.
+
+Attributes syntax and rules:
+
+-Rules
+
+-1) -|  must be at the beginning of 'extra'
+
+-2) All attributes listed in 'extra' must be used atleast one time for the tag to convert.
+
+-3) The tag will not convert if an attribute is out of range
+
+-4) Do not use extra delimiters like / and , in 'extra', use as needed.
+
+Attribute syntax:
+
+    -|attribute_name/switch{range},attribute_name2/switch{range}
+
+Switches:
+
+n{0-0000} = Number range n{1-10} means any number from 1 to 10
+
+w{0000}   = Word range character pre-set limit is '\w,.!?- ' w{5} means text 5 in length or less
+
+w{xx|xx}  = Word match w{This|That} will match 'This' or 'That' and supports regex in w{regex}
+
+l{x-y}    = Letter range with no length check l{a-c} means any letters from a to c
+
+l{0000}   = Length check l{5} means text 5 in length or less
+
+note: usage of X{attribute_name} in the markup will be replaced with the value
+if everything is correct.
+
+        # tag: [dd=Stuff 7 attr=33]stuff[/dd]
+        # output: <dd attr="33" alt="Stuff 7">stuff</dd>
+        $aubbc->add_tag(
+          'tag' => 'dd',
+          'type' => '2',
+          'function' => '',
+          'message' => 'any',
+          'extra' => '-|attr/n{20-100},dd/w{7}',
+          'markup' => '<%{tag} attr="X{attr}" alt="X{dd}">%{message}</%{tag}>',
+        );
+
+        # tag: [video height=90 width=115]http://www.video.com/video.mp4[/video]
+        # output: <video width="115" height="90" controls="controls">
+        #<source src="http://www.video.com/video.mp4" type="video/mp4" />
+        #Your browser does not support the video tag.
+        #</video>
+        $aubbc->add_tag(
+          'tag' => 'video',
+          'type' => '2',
+          'function' => '',
+          'message' => 'src',
+          'extra' => '-|width/n{90-120},height/n{60-90}',
+          'markup' => '<video width="X{width}" height="X{height}" controls="controls">
+        <source src="%{message}" type="video/mp4" />
+        Your browser does not support the video tag.
+        </video>',
+        );
+
+Markup:
+This is the template of the tag and has tags of its own giving you more controle
+
+Markup Template Tags:
+
+Tag             Info
+%setting%       Any setting name in AUBBC2's main setting hash %AUBBC
+%{tag}          Tag value
+%{message}      Message value
+%{extra}        Extra value for non-attribute syntax
+X{attribute}    Attribute names for values of attribute syntax
+
+
+http://www.youtube.com/watch?v=cfOa1a8hYP8
+
+=cut
