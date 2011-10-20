@@ -98,6 +98,26 @@ use AUBBC2;
 $loaded{AUBBC2} = AUBBC2->VERSION;
 #$AUBBC2::MEMOIZE = 0;
 my $au2 = AUBBC2->new();
+
+  $au2->add_tag(
+        tag     => 'dd',
+        type  => 'balanced',
+        function  => '',
+        message    => 'any',
+        extra    => '-|width/n{90-120},height/n{60-90}',
+        markup   => '<dd width="X{width}" height="X{height}">
+<source src="%{message}" type="video/mp4" />
+Your browser does not support the video tag.
+</dd>',);
+
+ $au2->add_tag(
+  'tag' => 'email',
+  'type' => 'balanced',
+  'function' => '',
+  'message' => '[\w\.\-\&\+]+\@[\w\.\-]+',
+  'extra' => '',
+  'markup' => "<a href=\"mailto:%{message}\"%href_class%>%{message}</a>",
+  );
 return $au2;
 }
 
@@ -116,8 +136,10 @@ my $au2 = &create_au2;
 
 # un-commit below to see each modules output
 
-my $rendered4 = $au2->do_all_ubbc($code);
-print "AUBBC2\t$loaded{AUBBC2}\n$rendered4\n\n";
+my $rendered4 = $au2->parse_bbcode($code);
+ $rendered4 .= $au2->tag_list();
+ $rendered4 .= "\n\nErrors:\n".$au2->error_message();
+print "AUBBC2\t$loaded{AUBBC2}\n$rendered4\n\nEnd\n";
 
 #my $rendered5 = $au->do_all_ubbc($code);
 #print "AUBBC\t$loaded{AUBBC}\n$rendered5\n\n";
@@ -127,7 +149,7 @@ print "AUBBC2\t$loaded{AUBBC2}\n$rendered4\n\n";
 timethese($ARGV[0] || -1, {
     $loaded{'AUBBC2'} ?  (
         'AU2::new' => \&create_au2,
-        'AU2::x' => sub { my $out = $au2->do_all_ubbc($code); },
+        'AU2::x' => sub { my $out = $au2->parse_bbcode($code); },
     ) : (),
 #    $loaded{'AUBBC'} ?  (
 #        'AU::new' => \&create_au,

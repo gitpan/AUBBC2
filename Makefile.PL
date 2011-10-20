@@ -1,8 +1,7 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
-        'NAME' => "AUBBC2",
+        'NAME' => 'AUBBC2',
         'AUTHOR' => 'Nicholas K. Alberto <shakaflex [at] gmail.com>',
         'VERSION_FROM' => 'AUBBC2.pm',
-        'ABSTRACT' => 'BBcode placeholders with HTML Template.',
-        'PREREQ_PM' => {'Memoize' => 0}
+        'ABSTRACT' => 'BBcode Placeholders with HTML Template'
 );

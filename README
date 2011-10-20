@@ -1,15 +1,35 @@
 
 =head1 COPYLEFT
 
-AUBBC2.pm, v1.00 alpha 3 10/16/2011 By: N.K.A.
+AUBBC2.pm, v1.00 alpha 4 10/20/2011 By: N.K.A.
+
 ------------------>^- Yes this is a test version and is subjected to changes.
 
 shakaflex [at] gmail.com
+
 http://search.cpan.org/~sflex/
 
-Advanced Universal Bulletin Board Code 2 - Engine for BBcode to HTML
+Advanced Universal Bulletin Board Code 2
 
 BBcode Placeholders with HTML Template
+
+=head1 SYNOPSIS
+
+      use AUBBC2;
+      my $aubbc = AUBBC2->new();
+      my $message = '[b]stuf[/b]';
+      print  $aubbc->parse_bbcode($message);
+
+=head1 ABSTRACT
+
+BBcode Placeholders with HTML Template
+
+=head1 DESCRIPTION
+
+The main consept for this is to prase bbcode to markup and give a lot of
+controle over each tag designed through templating the markup. The attributes
+syntax for 'extra' should help to reduce the need to do reguler-expretions to
+validate attributes. Still under development so consept can change.
 
 AUBBC vs AUBBC2
 
@@ -21,34 +41,72 @@ to changes and may not fully work or needs more testing.
 
 This module can fully support BBcode to HTML/XHTML Strict.
 Block in Inline and incorrectly nested tags do not exsits if you switch to
-CSS classes in DIV elements or we will find out soon enough.
+CSS classes in DIV elements and disable nested tags by escaping the bracket's
+after the first tag was parsed or using HTML::Tidy but thats over board.
 
-      use AUBBC2;
-      my $aubbc = AUBBC2->new();
-      my $message = '[b]stuf[/b]';
-      print  $aubbc->do_all_ubbc($message);
+=head1 Testing
 
+This list of methods are the focuse of testing for this version. The methods
+with * should be low in testing priority or will work well.
+
+# Main parser
+
+parse_bbcode()
+
+# Editing tags
+
+add_tag()
+
+remove_tag()
+
+clear_tags()
+
+tag_list()
+
+# %AUBBC settings editing
+
+add_settings()
+
+get_setting()
+
+remove_setting()
+
+# Error Messages *
+
+error_message()
+
+# filters *
+
+script_escape()
+
+html_to_text()
+
+escape_aubbc()
+
+# Module version *
+
+version()
 
 =head1 Adding Tags
 
         $aubbc->add_tag(
           'tag' => 'Tag',               # Tag name:
-          'type' => '#',                # Type number: tag style
+          'type' => 'X',                # Type name: tag style
           'function' => '',             # Function: subroutine to expand methods
           'message' => 'any',           # Message: of tag
           'extra' => '',                # Extra: of tag
           'markup' => '',               # Template: output
         );
 
-Type number:              Tag style
+Type name:              Tag style
 
-1                       [tag]
+single                  [tag]
 
-2			[tag]message[/tag] or [tag=extra]message[/tag] or [tag attr=x...]message[/tag] or [tag=x attr=x...]message[/tag]
+balanced		[tag]message[/tag] or [tag=extra]message[/tag] or [tag attr=x...]message[/tag] or [tag=x attr=x...]message[/tag]
 
-3			[tag://message] or [tag://message|extra]
+link			[tag://message] or [tag://message|extra]
 
-4                       replace or remove
+strip                   replace or remove
 
 Tag name:
 This allows a single tag added to change many tags and supports more complex regex:
@@ -58,7 +116,7 @@ This allows a single tag added to change many tags and supports more complex reg
         # Output: <b>message</b> or <i>message</i>
         $aubbc->add_tag(
           'tag' => 'b|i', # b or i
-          'type' => '2',
+          'type' => 'balanced',
           'function' => '',
           'message' => 'any',
           'extra' => '',
@@ -66,8 +124,8 @@ This allows a single tag added to change many tags and supports more complex reg
         );
 
 Function:
-The name gets check to make sure its a defined subroutine and gets passed more
-variables then before.
+The name gets check to make sure its a defined subroutine then gets passed these
+variables of the tag.
 
         sub new_function {
         # $tag, $message, $attrs are the captured group of its place
@@ -132,7 +190,7 @@ if everything is correct.
         # output: <dd attr="33" alt="Stuff 7">stuff</dd>
         $aubbc->add_tag(
           'tag' => 'dd',
-          'type' => '2',
+          'type' => 'balanced',
           'function' => '',
           'message' => 'any',
           'extra' => '-|attr/n{20-100},dd/w{7}',
@@ -146,7 +204,7 @@ if everything is correct.
         #</video>
         $aubbc->add_tag(
           'tag' => 'video',
-          'type' => '2',
+          'type' => 'balanced',
           'function' => '',
           'message' => 'src',
           'extra' => '-|width/n{90-120},height/n{60-90}',
@@ -157,18 +215,22 @@ if everything is correct.
         );
 
 Markup:
+
 This is the template of the tag and has tags of its own giving you more controle
 
 Markup Template Tags:
 
-Tag             Info
+Tag:            Info
+
 %setting%       Any setting name in AUBBC2's main setting hash %AUBBC
+
 %{tag}          Tag value
+
 %{message}      Message value
+
 %{extra}        Extra value for non-attribute syntax
+
 X{attribute}    Attribute names for values of attribute syntax
 
-
-http://www.youtube.com/watch?v=cfOa1a8hYP8
 
 =cut
