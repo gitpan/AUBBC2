@@ -8,7 +8,7 @@ use Benchmark;
 # this bench is more accuret in showing the
 # time it takes for the modules to load.
 
-#use lib '.';
+#use lib './';
 my %loaded;
 
 my $code = <<'EOM';
@@ -93,31 +93,15 @@ EOM
 
 
 sub create_au2 {
+
 use AUBBC2;
-#use Memoize;
+
+# path to bbcode_config/config.pl
+$AUBBC2::Config = '/home/bbcode_config/config.pl';
+
 $loaded{AUBBC2} = AUBBC2->VERSION;
-#$AUBBC2::MEMOIZE = 0;
 my $au2 = AUBBC2->new();
 
-  $au2->add_tag(
-        tag     => 'dd',
-        type  => 'balanced',
-        function  => '',
-        message    => 'any',
-        extra    => '-|width/n{90-120},height/n{60-90}',
-        markup   => '<dd width="X{width}" height="X{height}">
-<source src="%{message}" type="video/mp4" />
-Your browser does not support the video tag.
-</dd>',);
-
- $au2->add_tag(
-  'tag' => 'email',
-  'type' => 'balanced',
-  'function' => '',
-  'message' => '[\w\.\-\&\+]+\@[\w\.\-]+',
-  'extra' => '',
-  'markup' => "<a href=\"mailto:%{message}\"%href_class%>%{message}</a>",
-  );
 return $au2;
 }
 

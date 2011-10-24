@@ -1,7 +1,7 @@
 
 =head1 COPYLEFT
 
-AUBBC2.pm, v1.00 alpha 4 10/20/2011 By: N.K.A.
+AUBBC2.pm, v1.00 alpha 5 10/24/2011 By: N.K.A.
 
 ------------------>^- Yes this is a test version and is subjected to changes.
 
@@ -16,8 +16,13 @@ BBcode Placeholders with HTML Template
 =head1 SYNOPSIS
 
       use AUBBC2;
+      $AUBBC2::MEMOIZE     = 1; # Module Speed
+      @AUBBC2::TAGS        = ();# Tags
+      %AUBBC2::regex       = ();# regex for add_tag()
+      $AUBBC2::Config      = '';# Path to configuration file
+
       my $aubbc = AUBBC2->new();
-      my $message = '[b]stuf[/b]';
+      my $message = '[[b]]stuf[[/b]]'; # Escape bold tag
       print  $aubbc->parse_bbcode($message);
 
 =head1 ABSTRACT
@@ -26,10 +31,12 @@ BBcode Placeholders with HTML Template
 
 =head1 DESCRIPTION
 
-The main consept for this is to prase bbcode to markup and give a lot of
-controle over each tag designed through templating the markup. The attributes
-syntax for 'extra' should help to reduce the need to do reguler-expretions to
-validate attributes. Still under development so consept can change.
+The main concept for this is to parse bbcode to markup and give a lot of
+control over each tag designed through placeholders and tempting the markup.
+As it is now the BBcode tags end up being a big list that can be saved in a
+back-end or configuration file to be parsed. The attributes syntax for 'extra'
+should help to reduce the need to do regular-expressions to validate attributes.
+Still under development so concept can change.
 
 AUBBC vs AUBBC2
 
@@ -40,18 +47,25 @@ AUBBC2 = Is an alpha version meaning any part of the program is subjected
 to changes and may not fully work or needs more testing.
 
 This module can fully support BBcode to HTML/XHTML Strict.
-Block in Inline and incorrectly nested tags do not exsits if you switch to
-CSS classes in DIV elements and disable nested tags by escaping the bracket's
-after the first tag was parsed or using HTML::Tidy but thats over board.
+Block in Inline and incorrectly nested tags do not exists if you switch to
+CSS classes in DIV elements.
 
 =head1 Testing
 
-This list of methods are the focuse of testing for this version. The methods
+This list of methods are the focus of testing for this version. The methods
 with * should be low in testing priority or will work well.
 
-# Main parser
+# Parser's
 
 parse_bbcode()
+
+single()
+
+balanced()
+
+linktag()
+
+strip()
 
 # Editing tags
 
@@ -104,7 +118,7 @@ single                  [tag]
 
 balanced		[tag]message[/tag] or [tag=extra]message[/tag] or [tag attr=x...]message[/tag] or [tag=x attr=x...]message[/tag]
 
-link			[tag://message] or [tag://message|extra]
+linktag			[tag://message] or [tag://message|extra]
 
 strip                   replace or remove
 
@@ -140,7 +154,7 @@ variables of the tag.
          # C) if both are blank the tag doesnt change.
 
          return ($message, $markup);
-         # May have to return more so we have better/more controle
+         # May have to return more so we have better/more control
         }
 
 Message:
@@ -161,7 +175,7 @@ Attributes syntax and rules:
 
 -1) -|  must be at the beginning of 'extra'
 
--2) All attributes listed in 'extra' must be used atleast one time for the tag to convert.
+-2) All attributes listed in 'extra' must be used at least one time for the tag to convert.
 
 -3) The tag will not convert if an attribute is out of range
 
@@ -216,7 +230,7 @@ if everything is correct.
 
 Markup:
 
-This is the template of the tag and has tags of its own giving you more controle
+This is the template of the tag and has tags of its own giving you more control
 
 Markup Template Tags:
 
@@ -232,5 +246,10 @@ Tag:            Info
 
 X{attribute}    Attribute names for values of attribute syntax
 
+=head1 Development Guidance
+
+http://www.perlmonks.com/
+
+http://perldoc.perl.org/
 
 =cut
