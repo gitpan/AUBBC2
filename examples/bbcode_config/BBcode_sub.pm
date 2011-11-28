@@ -4,6 +4,12 @@ use warnings;
 
 my @key64   = ('A'..'Z','a'..'z',0..9,'+','/'); # protect email tag
 
+sub clean_msg {
+ my ($type, $tag, $msg, $markup, $extra, $attrs) = @_;
+ $msg =~ s/\r?\n?<br(?:\s?\/)?>//g;
+ return ('', $msg);
+}
+
 sub protect_email {
  my ($type, $tag, $email, $markup, $extra, $attrs) = @_;
  my $option = 4;

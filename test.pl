@@ -11,7 +11,7 @@ my ($count, $message, $setting, $aubbc, $Current_version, %msg) =
 
 BEGIN {
  $| = 1;
- print "Test's 1 to 4\n";
+ print "Test's 1 to 3\n";
 }
 
 use AUBBC2;
@@ -25,17 +25,17 @@ $aubbc = AUBBC2->new();
 
  if ($aubbc) {
   $aubbc->add_settings(html_type => 'xhtml');
-  $message = $aubbc->parse_bbcode($message);
+  #$message = $aubbc->parse_bbcode($message);
   $setting = $aubbc->get_setting('html_type');
   $Current_version = $aubbc->version();
  }
- $count++;
+ #$count++;
  
  # did it convert?
  #$message = ']'; # reinforce failure
- $message =~ m/&/
-  ? print $msg{1} . "$count\n"
-  : print $msg{2} . "$count\n";
+# $message =~ m/&/
+#  ? print $msg{1} . "$count\n"
+#  : print $msg{2} . "$count\n";
 }
 
 END {
@@ -49,7 +49,7 @@ END {
   $count++;
  # did we get the version?
  #$Current_version = 5; # reinforce failure
- $Current_version eq '1.00a5'
+ $Current_version eq '1.00a6'
   ? print $msg{1} . "$count\n"
   : print $msg{2} . "$count\n";
 }

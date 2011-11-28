@@ -8,7 +8,7 @@ use Benchmark;
 # this bench is more accuret in showing the
 # time it takes for the modules to load.
 
-#use lib './';
+#use lib '.';
 my %loaded;
 
 my $code = <<'EOM';
@@ -97,7 +97,7 @@ sub create_au2 {
 use AUBBC2;
 
 # path to bbcode_config/config.pl
-$AUBBC2::Config = '/home/bbcode_config/config.pl';
+$AUBBC2::Config = 'C:\xampp\cgi-bin\AUBBC2-1.00a5\examples\bbcode_config\config.pl';
 
 $loaded{AUBBC2} = AUBBC2->VERSION;
 my $au2 = AUBBC2->new();

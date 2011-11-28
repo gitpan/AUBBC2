@@ -2,30 +2,27 @@ package AUBBC2;
 use strict;
 use warnings;
 
-our $VERSION     = '1.00a5';
+our $VERSION     = '1.00a6';
 our $MEMOIZE     = 1; # Testing Speed
 our @TAGS        = ();
 our %regex       = ();
 our $Config      = '';
 
 my $aubbc_error  = '';
-my $msg          = '';
 my %xlist        = ();
 my $add_reg      = '';
 my $mem_flag     = '';
 # more settings can be # removed but are used in testing
 my %AUBBC        = (
-    aubbc_escape        => 1,
     script_escape       => 1,
-    fix_amp             => 1,
     line_break          => '1',
+    html_type           => ' /',
     icon_image          => 1,#
     image_hight         => '60',#
     image_width         => '90',#
     image_border        => '0',#
     image_wrap          => ' ',#
     href_target         => ' target="_blank"',#
-    html_type           => ' /',#
     code_class          => '',#
     code_extra          => '',#
     href_class          => '',#
@@ -77,12 +74,10 @@ sub remove_setting {
 }
 
 sub parse_bbcode {
- my ($self,$message) = @_;
- $msg = defined $message ? $message : '';
+ my ($self,$msg) = @_;
+ $msg = defined $msg ? $msg : '';
  if ($msg) {
   $msg = $self->script_escape($msg,'') if $AUBBC{script_escape};
-  $msg =~ s/&(?!\#?[\d\w]+;)/&amp;/g if $AUBBC{fix_amp};
-  escape_aubbc() if $AUBBC{aubbc_escape};
   
   foreach my $tag (@TAGS) {
   next unless defined $$tag{type};
@@ -100,8 +95,7 @@ sub parse_bbcode {
     $msg = $self->strip(%$tag);
    }
   }
-  
-  $msg =~ tr/\000//d if $AUBBC{aubbc_escape};
+
  }
  return $msg;
 }
@@ -214,7 +208,7 @@ sub set_tag {
   }
   
  }
-  else {
+  elsif ($type ne 'strip') {
    $markup = $message;
  }
 
@@ -223,30 +217,25 @@ sub set_tag {
 
 sub match_range {
 my ($task, $limited) = @_;
- if (defined $limited && $task =~ m/\An/ && $limited =~ m/\A\d+\z/) {
-   $task =~ m/{(\d+)\-(\d+)}\z/;
+ if ($limited =~ m/\A\d+\z/ && $task =~ m/\An{(\d+)\-(\d+)}\z/) {
    $limited >= $1 && $limited <= $2 ? return 1 : return 0;
  }
-  elsif (defined $limited && $task =~ m/\Al/) {
-  if ($task =~ m/{(\d+)}\z/) {
-   length($limited) <= $1 ? return 1 : return 0;
-  }
-   elsif ($task =~ m/{([a-z])\-([a-z])}\z/i) {
-   $limited !~ m/\A[$1-$2]+\z/i ? return 0 : return 1;
-   } else { return 0; }
+  elsif ($task =~ m/\Al{(\d+)}\z/) {
+  length($limited) <= $1 ? return 1 : return 0;
  }
-  elsif (defined $limited && $task =~ m/\Aw/) {
-  if ($task =~ m/{(\d+)}\z/) {
+  elsif ($task =~ m/\Al{([a-z])\-([a-z])}\z/i) {
+  $limited !~ m/\A[$1-$2]+\z/i ? return 0 : return 1;
+ }
+  elsif ($task =~ m/\Aw{(\d+)}\z/) {
    length($limited) <= $1
     && $limited =~ m/\A[\w\s\-\.\,\!\?]+\z/i ? return 1 : return 0;
-   }
-    elsif ($task =~ m/{(.+?)}\z/) {
-     $limited =~ m/\A(?:$1)\z/i ? return 1 : return 0;
-    } else { return 0; }
+ }
+  elsif ($task =~ m/\Aw{(.+?)}\z/) {
+  $limited =~ m/\A(?:$1)\z/i ? return 1 : return 0;
  }
   else {
-   return 0;
-  }
+  return 0;
+ }
 }
 
 sub check_subroutine {
@@ -327,11 +316,6 @@ sub clear_tags {
  @TAGS = ();
 }
 
-sub escape_aubbc {
- $msg =~ s/\[\[/\000&#91;/g;
- $msg =~ s/\]\]/\000&#93;/g;
-}
-
 sub script_escape {
  my ($self, $text, $option) = @_;
  $text = '' unless defined $text;
@@ -399,7 +383,7 @@ __END__
 
 =head1 COPYLEFT
 
-AUBBC2.pm, v1.00 alpha 5 10/24/2011 By: N.K.A.
+AUBBC2.pm, v1.00 alpha 6 11/28/2011 By: N.K.A.
 
 ------------------>^- Yes this is a test version and is subjected to changes.
 
@@ -418,9 +402,19 @@ BBcode Placeholders with HTML Template
       @AUBBC2::TAGS        = ();# Tags
       %AUBBC2::regex       = ();# regex for add_tag()
       $AUBBC2::Config      = '';# Path to configuration file
-      
+
       my $aubbc = AUBBC2->new();
-      my $message = '[[b]]stuf[[/b]]'; # Escape bold tag
+      
+      $aubbc->add_tag(
+          'tag' => 'b|i', # b or i
+          'type' => 'balanced',
+          'function' => '',
+          'message' => 'any',
+          'extra' => '',
+          'markup' => '<%{tag}>%{message}</%{tag}>',
+        );
+        
+      my $message = '[b]Foo[/b]'; # bold tag
       print  $aubbc->parse_bbcode($message);
 
 =head1 ABSTRACT
@@ -429,12 +423,12 @@ BBcode Placeholders with HTML Template
 
 =head1 DESCRIPTION
 
-The main consept for this is to prase bbcode to markup and give a lot of
-controle over each tag designed through placeholders and templating the markup.
+The main concept for this is to parse bbcode to markup and give a lot of
+control over each tag designed through placeholders and templating the markup.
 As it is now the BBcode tags end up being a big list that can be saved in a
 back-end or configuration file to be parsed. The attributes syntax for 'extra'
-should help to reduce the need to do reguler-expretions to validate attributes.
-Still under development so consept can change.
+should help to reduce the need to do regular-expressions to validate attributes.
+Still under development so concept can change.
 
 AUBBC vs AUBBC2
 
@@ -445,19 +439,28 @@ AUBBC2 = Is an alpha version meaning any part of the program is subjected
 to changes and may not fully work or needs more testing.
 
 This module can fully support BBcode to HTML/XHTML Strict.
-Block in Inline and incorrectly nested tags do not exsits if you switch to
+Block in Inline and incorrectly nested tags do not exists if you switch to
 CSS classes in DIV elements.
 
 =head1 Testing
 
-This list of methods are the focuse of testing for this version. The methods
+In this version all of the filters except for the script_escape and html_to_text
+are in the config file and the strip parser works.
+This list of methods are the focus of testing for this version. The methods
 with * should be low in testing priority or will work well.
 
 # Parser's
 
 parse_bbcode()
 
-single()
+        single(
+         'tag'       => '',  # Tag
+         'function'  => '',  # Function
+         'message'   => '',  # Message area of the tag
+         'extra'     => '',  # Extra areas of the tag
+         'markup'    => '',  # Tag Temptlate
+         'parse'     => '',  # Parse Content & must script_escape for security
+         );
 
 balanced()
 
@@ -493,7 +496,6 @@ script_escape()
 
 html_to_text()
 
-escape_aubbc()
 
 # Module version *
 
@@ -542,17 +544,17 @@ variables of the tag.
         sub new_function {
         # $tag, $message, $attrs are the captured group of its place
          my ($type, $tag, $message, $markup, $extra, $attrs) = @_;
-         
+
          # expand functions....
-         
+
          # A) if there is a $message and blank $markup the $message will replace the tag.
          # B) if there is both $message and $markup, then $message can be inserted
          # into $markup if $markup has %{message} or any "Markup Template Tags",
          # then markup will replace the tag.
          # C) if both are blank the tag doesnt change.
-         
+
          return ($message, $markup);
-         # May have to return more so we have better/more controle
+         # May have to return more so we have better/more control
         }
 
 Message:
@@ -573,7 +575,7 @@ Attributes syntax and rules:
 
 -1) -|  must be at the beginning of 'extra'
 
--2) All attributes listed in 'extra' must be used atleast one time for the tag to convert.
+-2) All attributes listed in 'extra' must be used at least one time for the tag to convert.
 
 -3) The tag will not convert if an attribute is out of range
 
@@ -628,7 +630,7 @@ if everything is correct.
 
 Markup:
 
-This is the template of the tag and has tags of its own giving you more controle
+This is the template of the tag and has tags of its own giving you more control
 
 Markup Template Tags:
 

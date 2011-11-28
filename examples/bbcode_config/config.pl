@@ -6,7 +6,7 @@
 # - names of hash %regex is only used in add_tag() "if add_tag is used!"
 
 # Directory path to BBcode_sub.pm
-use lib './';
+use lib '.';
 use BBcode_sub;
 
 # Customize internal regex and names for message and extra add_tag()
@@ -21,6 +21,30 @@ use BBcode_sub;
 # message or extra will not change names like src to regex
 #
 @TAGS = (
+ {
+ 'tag' => 'fix_amp',
+  'type' => 'strip',
+  'function' => '',
+  'message' => '&(?!\#?[\d\w]+;)',
+  'extra' => '',
+  'markup' => '&amp;',
+ },
+ {
+ 'tag' => 'aubbc_escape_right',
+  'type' => 'strip',
+  'function' => '',
+  'message' => '\]\]',
+  'extra' => '',
+  'markup' => "\000&#93;",
+ },
+ {
+ 'tag' => 'aubbc_escape_left',
+  'type' => 'strip',
+  'function' => '',
+  'message' => '\[\[',
+  'extra' => '',
+  'markup' => "\000&#91;",
+ },
  {
  'tag' => 'code|c',
   'type' => 'balanced',
@@ -207,6 +231,22 @@ Your browser does not support the video tag.
   'type' => 'balanced',
   'function' => \&BBcode_sub::protect_email,
   'message' => '[\w\.\-\&\+]+\@[\w\.\-]+',
+  'extra' => '',
+  'markup' => '',
+  },
+  {
+  'tag' => 'fix_list',
+  'type' => 'strip',
+  'function' => \&BBcode_sub::clean_msg,
+  'message' => '<\/?(?:ol|ul|li|hr)\s?\/?>\r?\n?<br(?:\s?\/)?>',
+  'extra' => '',
+  'markup' => '',
+  },
+  {
+  'tag' => 'aubbc_escape_Null',
+  'type' => 'strip',
+  'function' => '',
+  'message' => "\000",
   'extra' => '',
   'markup' => '',
   }

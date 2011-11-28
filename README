@@ -1,7 +1,6 @@
-
 =head1 COPYLEFT
 
-AUBBC2.pm, v1.00 alpha 5 10/24/2011 By: N.K.A.
+AUBBC2.pm, v1.00 alpha 6 11/28/2011 By: N.K.A.
 
 ------------------>^- Yes this is a test version and is subjected to changes.
 
@@ -22,7 +21,17 @@ BBcode Placeholders with HTML Template
       $AUBBC2::Config      = '';# Path to configuration file
 
       my $aubbc = AUBBC2->new();
-      my $message = '[[b]]stuf[[/b]]'; # Escape bold tag
+
+      $aubbc->add_tag(
+          'tag' => 'b|i', # b or i
+          'type' => 'balanced',
+          'function' => '',
+          'message' => 'any',
+          'extra' => '',
+          'markup' => '<%{tag}>%{message}</%{tag}>',
+        );
+
+      my $message = '[b]Foo[/b]'; # bold tag
       print  $aubbc->parse_bbcode($message);
 
 =head1 ABSTRACT
@@ -32,7 +41,7 @@ BBcode Placeholders with HTML Template
 =head1 DESCRIPTION
 
 The main concept for this is to parse bbcode to markup and give a lot of
-control over each tag designed through placeholders and tempting the markup.
+control over each tag designed through placeholders and templating the markup.
 As it is now the BBcode tags end up being a big list that can be saved in a
 back-end or configuration file to be parsed. The attributes syntax for 'extra'
 should help to reduce the need to do regular-expressions to validate attributes.
@@ -52,6 +61,8 @@ CSS classes in DIV elements.
 
 =head1 Testing
 
+In this version all of the filters except for the script_escape and html_to_text
+are in the config file and the strip parser works.
 This list of methods are the focus of testing for this version. The methods
 with * should be low in testing priority or will work well.
 
@@ -59,7 +70,14 @@ with * should be low in testing priority or will work well.
 
 parse_bbcode()
 
-single()
+        single(
+         'tag'       => '',  # Tag
+         'function'  => '',  # Function
+         'message'   => '',  # Message area of the tag
+         'extra'     => '',  # Extra areas of the tag
+         'markup'    => '',  # Tag Temptlate
+         'parse'     => '',  # Parse Content & must script_escape for security
+         );
 
 balanced()
 
@@ -95,7 +113,6 @@ script_escape()
 
 html_to_text()
 
-escape_aubbc()
 
 # Module version *
 
